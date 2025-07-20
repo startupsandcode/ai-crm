@@ -45,18 +45,28 @@ const Header = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-6">
+          {!loading && !user && (
+            <>
+              <Link href="/#features" className="text-white/80 hover:text-white font-medium">Features</Link>
+              <Link href="/#pricing" className="text-white/80 hover:text-white font-medium">Pricing</Link>
+            </>
+          )}
+
           {!loading && user ? (
             <>
               <Link href="/dashboard/contacts" className="text-white/80 hover:text-white font-medium">Contacts</Link>
               <Link href="/dashboard/campaigns" className="text-white/80 hover:text-white font-medium">Campaigns</Link>
               <Link href="/dashboard" className="text-white/80 hover:text-white font-medium">Dashboard</Link>
+              <Link href="/dashboard?onboarding=true" title="Restart Onboarding" className="text-white/60 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12a9 9 0 0118 0M12 7v5l3 3" />
+                </svg>
+              </Link>
               <button onClick={handleLogout} className="btn-primary px-6 py-2.5 rounded-lg font-semibold">Log Out</button>
             </>
           ) : (
             <>
-              <Link href="/#features" className="text-white/80 hover:text-white font-medium">Features</Link>
-              <Link href="/#pricing" className="text-white/80 hover:text-white font-medium">Pricing</Link>
               <Link href="/auth/login" className="text-white/80 hover:text-white font-medium">Log In</Link>
               <Link href="/auth/signup" className="btn-primary px-6 py-2.5 rounded-lg font-semibold inline-block">Sign Up</Link>
             </>
@@ -69,19 +79,8 @@ const Header = () => {
             className="text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-              />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
             </svg>
           </button>
         </div>
@@ -91,6 +90,13 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden glass-effect border-t border-white/5">
           <div className="px-4 py-5 space-y-4">
+            {!loading && !user && (
+              <>
+                <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Features</Link>
+                <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Pricing</Link>
+              </>
+            )}
+
             {!loading && user ? (
               <>
                 <Link href="/dashboard/contacts" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Contacts</Link>
@@ -100,8 +106,6 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Features</Link>
-                <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Pricing</Link>
                 <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Log In</Link>
                 <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)} className="btn-primary block text-center py-2 rounded-lg font-medium">Sign Up</Link>
               </>
