@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/utils/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/utils/supabaseClient';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,33 +12,59 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error) router.push('/dashboard');
-    else alert(error.message);
+
+    if (!error) {
+      // Get redirect path from URL
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectedFrom = searchParams.get('redirectedFrom');
+
+      // Only redirect to safe internal paths
+      const redirectPath = redirectedFrom?.startsWith('/') ? redirectedFrom : '/dashboard';
+      router.push(redirectPath);
+    } else {
+      alert(error.message);
+    }
   };
 
   return (
-    <div className="p-8 flex flex-col max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <input
-        className="border px-4 py-2 mb-3"
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className="border px-4 py-2 mb-3"
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin} className="bg-blue-600 text-white px-4 py-2 rounded">
-        Sign In
-      </button>
-      <p className="text-sm mt-4">
-          Don’t have an account? <a className="text-blue-500 underline" href="/auth/signup">Sign up</a>
-      </p>
-    </div>
+    <main className="min-h-screen flex flex-col justify-center items-center px-4 pt-20 text-white text-center relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-purple-800/10 z-0" />
+      <div className="absolute top-24 left-1/3 w-72 h-72 bg-blue-500/20 rounded-full mix-blend-multiply blur-3xl opacity-20 animate-blob" />
+      <div className="absolute top-40 right-1/3 w-72 h-72 bg-purple-500/20 rounded-full mix-blend-multiply blur-3xl opacity-20 animate-blob animation-delay-2000" />
+
+      <div className="relative z-10 w-full max-w-md glass-effect p-8 rounded-xl shadow-xl border border-white/10">
+        <h2 className="text-3xl font-bold mb-6">Welcome Back</h2>
+
+        <input
+          className="w-full px-4 py-3 mb-4 rounded bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          className="w-full px-4 py-3 mb-6 rounded bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          onClick={handleLogin}
+          className="btn-primary w-full py-3 rounded-lg font-bold text-lg"
+        >
+          Log In
+        </button>
+
+        <p className="text-white/60 text-sm mt-6">
+          Don’t have an account?{' '}
+          <Link className="underline text-blue-400" href="/auth/signup">
+            Sign up
+          </Link>
+        </p>
+      </div>
+    </main>
   );
 }

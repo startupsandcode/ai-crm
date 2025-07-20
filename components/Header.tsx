@@ -2,11 +2,38 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/utils/supabaseClient';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push('/');
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="fixed top-0 left-0 w-full z-20 glass-effect border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -16,26 +43,29 @@ const Header = () => {
             <span>AI-CRM</span>
           </Link>
         </div>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <Link href="/#features" className="text-white/80 hover:text-white transition-colors font-medium">
-            Features
-          </Link>
-          <Link href="/#pricing" className="text-white/80 hover:text-white transition-colors font-medium">
-            Pricing
-          </Link>
-          <Link href="/auth/login" className="text-white/80 hover:text-white transition-colors font-medium">
-            Log In
-          </Link>
-          <Link href="/auth/signup" className="btn-primary px-6 py-2.5 rounded-lg font-semibold inline-block">
-            Sign Up
-          </Link>
+          {!loading && user ? (
+            <>
+              <Link href="/dashboard/contacts" className="text-white/80 hover:text-white font-medium">Contacts</Link>
+              <Link href="/dashboard/campaigns" className="text-white/80 hover:text-white font-medium">Campaigns</Link>
+              <Link href="/dashboard" className="text-white/80 hover:text-white font-medium">Dashboard</Link>
+              <button onClick={handleLogout} className="btn-primary px-6 py-2.5 rounded-lg font-semibold">Log Out</button>
+            </>
+          ) : (
+            <>
+              <Link href="/#features" className="text-white/80 hover:text-white font-medium">Features</Link>
+              <Link href="/#pricing" className="text-white/80 hover:text-white font-medium">Pricing</Link>
+              <Link href="/auth/login" className="text-white/80 hover:text-white font-medium">Log In</Link>
+              <Link href="/auth/signup" className="btn-primary px-6 py-2.5 rounded-lg font-semibold inline-block">Sign Up</Link>
+            </>
+          )}
         </nav>
-        
+
         {/* Mobile menu button */}
         <div className="md:hidden">
-          <button 
+          <button
             className="text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -56,23 +86,26 @@ const Header = () => {
           </button>
         </div>
       </div>
-      
-      {/* Mobile menu */}
+
+      {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden glass-effect border-t border-white/5">
           <div className="px-4 py-5 space-y-4">
-            <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white py-2 font-medium">
-              Features
-            </Link>
-            <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white py-2 font-medium">
-              Pricing
-            </Link>
-            <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white py-2 font-medium">
-              Log In
-            </Link>
-            <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)} className="btn-primary block text-center py-2 rounded-lg font-medium">
-              Sign Up
-            </Link>
+            {!loading && user ? (
+              <>
+                <Link href="/dashboard/contacts" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Contacts</Link>
+                <Link href="/dashboard/campaigns" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Campaigns</Link>
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Dashboard</Link>
+                <button onClick={handleLogout} className="btn-primary block text-center py-2 rounded-lg font-medium w-full">Log Out</button>
+              </>
+            ) : (
+              <>
+                <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Features</Link>
+                <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Pricing</Link>
+                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)} className="block text-white/80 hover:text-white font-medium">Log In</Link>
+                <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)} className="btn-primary block text-center py-2 rounded-lg font-medium">Sign Up</Link>
+              </>
+            )}
           </div>
         </div>
       )}
